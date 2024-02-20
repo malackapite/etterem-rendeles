@@ -4,7 +4,14 @@
  */
 package etteremrendeles;
 
+import java.awt.event.ItemEvent;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.AbstractButton;
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;
 
@@ -14,16 +21,18 @@ import javax.swing.ListModel;
  */
 public class RendelesGUI extends javax.swing.JFrame {
 
-    private Rendeles[] rendelesek;
+    private final Rendeles[] rendelesek;
     private int jelenAsztal;
     
     
     public RendelesGUI() {
         initComponents();
-        jelenAsztal=1;
-        rendelesek= new Rendeles[4];
-        for (int ix = 0; ix < rendelesek.length; ix++) {
-            rendelesek[ix]= new Rendeles("");
+        
+        jelenAsztal=0;
+        ArrayList<AbstractButton> tmp = Collections.list(buttonGroup1.getElements());
+        rendelesek= new Rendeles[tmp.size()];
+        for (int ix = 0; ix < tmp.size(); ix++) {
+            rendelesek[ix] = new Rendeles(tmp.get(ix).getText());
         }
     }
 
@@ -43,21 +52,22 @@ public class RendelesGUI extends javax.swing.JFrame {
         RadioAsztal3 = new javax.swing.JRadioButton();
         RadioAsztal4 = new javax.swing.JRadioButton();
         jPanel2 = new javax.swing.JPanel();
-        RendBtn = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         jList2 = new javax.swing.JList<>();
         jPanel3 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
+        EtelNevText = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        EtelList = new javax.swing.JList<>();
+        jSpinner1 = new javax.swing.JSpinner();
+        RendBtn = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         AsztalMenu = new javax.swing.JMenuItem();
         RendelesMenu = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Étterem rendelés");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Asztal:")));
         jPanel1.setPreferredSize(new java.awt.Dimension(150, 150));
@@ -65,6 +75,11 @@ public class RendelesGUI extends javax.swing.JFrame {
         buttonGroup1.add(RadioAsztal1);
         RadioAsztal1.setSelected(true);
         RadioAsztal1.setText("Piros");
+        RadioAsztal1.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                asztalValt(evt);
+            }
+        });
         RadioAsztal1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 RadioAsztal1ActionPerformed(evt);
@@ -73,12 +88,42 @@ public class RendelesGUI extends javax.swing.JFrame {
 
         buttonGroup1.add(RadioAsztal2);
         RadioAsztal2.setText("Zöld");
+        RadioAsztal2.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                asztalValt(evt);
+            }
+        });
+        RadioAsztal2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RadioAsztal4ActionPerformed(evt);
+            }
+        });
 
         buttonGroup1.add(RadioAsztal3);
         RadioAsztal3.setText("Kék");
+        RadioAsztal3.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                asztalValt(evt);
+            }
+        });
+        RadioAsztal3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RadioAsztal4ActionPerformed(evt);
+            }
+        });
 
         buttonGroup1.add(RadioAsztal4);
         RadioAsztal4.setText("Fehér");
+        RadioAsztal4.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                asztalValt(evt);
+            }
+        });
+        RadioAsztal4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RadioAsztal4ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -91,7 +136,7 @@ public class RendelesGUI extends javax.swing.JFrame {
                     .addComponent(RadioAsztal2)
                     .addComponent(RadioAsztal3)
                     .addComponent(RadioAsztal4))
-                .addContainerGap(72, Short.MAX_VALUE))
+                .addContainerGap(65, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -110,13 +155,6 @@ public class RendelesGUI extends javax.swing.JFrame {
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Asztal rendelései:")));
         jPanel2.setPreferredSize(new java.awt.Dimension(150, 150));
 
-        RendBtn.setText("Rendelés hozzáad");
-        RendBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                RendBtnActionPerformed(evt);
-            }
-        });
-
         jScrollPane3.setViewportView(jList2);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -125,17 +163,13 @@ public class RendelesGUI extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(RendBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(RendBtn)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -148,16 +182,21 @@ public class RendelesGUI extends javax.swing.JFrame {
             }
         });
 
-        jTextField1.setText("Étel neve");
+        EtelNevText.setToolTipText("Étel neve");
+        EtelNevText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EtelNevTextActionPerformed(evt);
+            }
+        });
 
-        jTextField2.setText("Étel ára");
-
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Babgulyás@1990", "Leves@1290", "Asd@1900", "A@3670" };
+        EtelList.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Babgulyás|1990", "Leves|1290", "Asd|1900", "A|3670" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane2.setViewportView(jList1);
+        jScrollPane2.setViewportView(EtelList);
+
+        jSpinner1.setToolTipText("Étel ára");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -168,9 +207,9 @@ public class RendelesGUI extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jTextField1)
+                        .addComponent(EtelNevText, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jSpinner1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -178,15 +217,21 @@ public class RendelesGUI extends javax.swing.JFrame {
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(EtelNevText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        RendBtn.setText("Rendelés hozzáad");
+        RendBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RendBtnActionPerformed(evt);
+            }
+        });
 
         jMenu1.setText("File");
 
@@ -198,7 +243,7 @@ public class RendelesGUI extends javax.swing.JFrame {
         });
         jMenu1.add(AsztalMenu);
 
-        RendelesMenu.setText("Rendelést fájlba ír");
+        RendelesMenu.setText("Ételek fájlba ír");
         RendelesMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 RendelesMenuActionPerformed(evt);
@@ -222,7 +267,8 @@ public class RendelesGUI extends javax.swing.JFrame {
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(RendBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -230,11 +276,13 @@ public class RendelesGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(RendBtn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -245,27 +293,78 @@ public class RendelesGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_RadioAsztal1ActionPerformed
 
     private void AsztalMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AsztalMenuActionPerformed
-        // TODO add your handling code here:
+        try {
+            FileWriter ir = new FileWriter("asztalok.txt");
+            ir.write("Rendelések:\r\n");
+            for (Rendeles rendeles : rendelesek) {
+                ir.write(rendeles.getAsztal()+"\r\n");
+                for (Etel etel : rendeles.getRendelesek()) {
+                    ir.write(etel.getNev()+"|"+etel.getAr()+"\r\n");
+                }
+                ir.write("\r\n");
+            }
+            ir.close();
+        } catch (IOException ex) {
+            Logger.getLogger(RendelesGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_AsztalMenuActionPerformed
 
     private void RendelesMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RendelesMenuActionPerformed
-        // TODO add your handling code here:
+        ListModel<String> tmp = EtelList.getModel();
+        try {
+            FileWriter ir = new FileWriter("etelek.txt");
+            ir.write("Ételek:\r\n");
+            for (int ix = 0; ix < tmp.getSize(); ix++) {
+                ir.write(tmp.getElementAt(ix).split("[|]")[0]+"\r\n");
+            }
+            ir.close();
+        } catch (IOException ex) {
+            Logger.getLogger(RendelesGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_RendelesMenuActionPerformed
 
     private void RendBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RendBtnActionPerformed
-        String[] sorok=jList1.getSelectedValue().split("@");
+        String[] sorok=EtelList.getSelectedValue().split("[|]");
         rendelesek[jelenAsztal].ujRendeles(new Etel(sorok[0],Integer.parseInt(sorok[1])));
-        ArrayList<Etel> tmp = rendelesek[jelenAsztal].getRendelesek();
-        
-        DefaultListModel dlm = new DefaultListModel();  
-        for(int ix=0; ix< tmp.size(); ix++)
-            dlm.addElement(tmp.get(ix));
-        jList2.setModel(dlm);
+        jList2.setModel( rendelesModelGeneral());
     }//GEN-LAST:event_RendBtnActionPerformed
 
+    private DefaultListModel rendelesModelGeneral() {
+        ArrayList<Etel> tmp = rendelesek[jelenAsztal].getRendelesek();
+        DefaultListModel dlm = new DefaultListModel();
+        for(int ix=0; ix< tmp.size(); ix++)
+            dlm.addElement(tmp.get(ix));
+        return dlm;
+    }
+
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
+        var model = EtelList.getModel();
+        DefaultListModel dlm = new DefaultListModel();
+        for(int ix=0; ix< model.getSize(); ix++)
+            dlm.addElement(model.getElementAt(ix));
+        dlm.addElement(EtelNevText.getText()+"|"+jSpinner1.getValue());
+        EtelList.setModel(dlm);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void asztalValt(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_asztalValt
+        if(evt.getStateChange()==ItemEvent.SELECTED){
+            ArrayList<AbstractButton> tmp = Collections.list(buttonGroup1.getElements());
+            int ix=0;
+            while (ix < tmp.size() && !tmp.get(ix).isSelected()) {
+                ix++;
+            }
+            jelenAsztal=ix;
+            jList2.setModel( rendelesModelGeneral());
+        }
+    }//GEN-LAST:event_asztalValt
+
+    private void RadioAsztal4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RadioAsztal4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_RadioAsztal4ActionPerformed
+
+    private void EtelNevTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EtelNevTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_EtelNevTextActionPerformed
 
     /**
      * @param args the command line arguments
@@ -304,6 +403,8 @@ public class RendelesGUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem AsztalMenu;
+    private javax.swing.JList<String> EtelList;
+    private javax.swing.JTextField EtelNevText;
     private javax.swing.JRadioButton RadioAsztal1;
     private javax.swing.JRadioButton RadioAsztal2;
     private javax.swing.JRadioButton RadioAsztal3;
@@ -312,7 +413,6 @@ public class RendelesGUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem RendelesMenu;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
-    private javax.swing.JList<String> jList1;
     private javax.swing.JList<String> jList2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
@@ -321,7 +421,6 @@ public class RendelesGUI extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JSpinner jSpinner1;
     // End of variables declaration//GEN-END:variables
 }
